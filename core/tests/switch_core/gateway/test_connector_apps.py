@@ -217,6 +217,7 @@ class World:
 
     async def install(self, environ: dict[str, str] | None = None) -> ConnectorApps:
         http = httpx.AsyncClient(transport=httpx.MockTransport(self.handle))
+        config = _config(gateway_public_url=self.public_url, **self.config)
         registration = ClientRegistration(
             session_factory=self.session_factory,
             keyring=TEST_KEYRING,
@@ -225,7 +226,7 @@ class World:
         )
         apps = ConnectorApps(
             catalog=CATALOG,
-            config=_config(gateway_public_url=self.public_url, **self.config),
+            config=config,
             environ=environ or {},
             session_factory=self.session_factory,
             store=ServiceAppCredentialStore(TEST_KEYRING),
@@ -256,7 +257,9 @@ class World:
         app.state.connector_apps = apps
         app.state.github_connections = None
         app.state.service_flows = ServiceFlows(
-            self.public_url, SignInFlows(self.session_factory, TEST_KEYRING)
+            self.public_url,
+            config.service_sign_in_redirect,
+            SignInFlows(self.session_factory, TEST_KEYRING),
         )
         app.include_router(connector_apps_router)
         app.include_router(service_connections_router)
