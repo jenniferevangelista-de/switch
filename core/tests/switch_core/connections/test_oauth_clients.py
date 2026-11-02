@@ -210,6 +210,7 @@ async def test_a_connection_through_a_client_registered_anew_must_reconnect(
         workspace_services=WorkspaceServiceStore(),
         workspace_gate=False,
         public_url=None,
+        allow_non_expiring_keys=False,
     )
     async with session_factory() as session:
         owner = await _user(session, "ada")

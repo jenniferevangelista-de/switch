@@ -87,6 +87,7 @@ def broker(
         workspace_services=WorkspaceServiceStore(),
         workspace_gate=False,
         public_url=None,
+        allow_non_expiring_keys=False,
     )
 
 
@@ -463,6 +464,7 @@ class TestChecks:
             workspace_services=WorkspaceServiceStore(),
             workspace_gate=False,
             public_url=None,
+            allow_non_expiring_keys=False,
         )
         world = await _world(session_factory)
         refused = await _refused(broker, session_factory, world.agent.id)
@@ -753,6 +755,7 @@ class TestConnectOnly:
             workspace_services=WorkspaceServiceStore(),
             workspace_gate=False,
             public_url=None,
+            allow_non_expiring_keys=False,
         )
         world = await _world(session_factory, expires_in=60)
 
@@ -927,6 +930,7 @@ def _switched_off(
         workspace_services=WorkspaceServiceStore(),
         workspace_gate=False,
         public_url=None,
+        allow_non_expiring_keys=False,
     )
 
 
@@ -1054,6 +1058,7 @@ async def _pass_through(
         workspace_services=WorkspaceServiceStore(),
         workspace_gate=False,
         public_url=None,
+        allow_non_expiring_keys=False,
     )
     async with session_factory() as session:
         owner = await _user(session, "ada")
@@ -1532,6 +1537,7 @@ async def _gated(
         workspace_services=WorkspaceServiceStore(),
         workspace_gate=gate,
         public_url=None,
+        allow_non_expiring_keys=False,
     )
     world = await _world(session_factory)
     async with session_factory() as session:

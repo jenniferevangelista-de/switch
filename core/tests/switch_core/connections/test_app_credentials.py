@@ -132,6 +132,7 @@ def _broker(session_factory: async_sessionmaker[AsyncSession]) -> ServiceBroker:
         workspace_services=WorkspaceServiceStore(),
         workspace_gate=False,
         public_url=None,
+        allow_non_expiring_keys=False,
     )
 
 

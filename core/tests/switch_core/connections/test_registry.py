@@ -291,6 +291,7 @@ def _broker(
         workspace_services=WorkspaceServiceStore(),
         workspace_gate=False,
         public_url=public_url,
+        allow_non_expiring_keys=False,
     )
 
 

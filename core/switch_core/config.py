@@ -351,6 +351,17 @@ class SwitchConfig(BaseSettings):
     # longer naming it, registers a new client, and every connection to that
     # service on this server must be reconnected once.
     service_sign_in_redirect: dict[str, RedirectMode] = Field(default_factory=dict)
+    # Whether a connector that takes a credential pasted in place of its
+    # sign-in offers one that never expires (its catalog method says
+    # `expires: never`, such as API and application keys), and hands it to
+    # agents. Off, such a method is not offered, cannot be connected, and a
+    # connection made with one while it was on must be reconnected another
+    # way; a pasted credential its vendor ends (`expires: vendor`, a token
+    # made with an end date) is offered either way. A never-expiring key can
+    # only be revoked at the vendor: disconnecting or removing a grant
+    # forgets it in Switch but leaves it working. An `api_key` catalog entry
+    # stays refused either way.
+    allow_non_expiring_keys: bool = False
     # Sets the Secure flag on the gateway's cookies (the switch_auth session
     # and the OIDC sign-in cookie), so they are never sent over plain HTTP.
     # Only a local stack served over http:// should turn it off.

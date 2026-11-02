@@ -615,6 +615,7 @@ class TestThroughTheBroker:
             workspace_services=WorkspaceServiceStore(),
             workspace_gate=False,
             public_url=None,
+            allow_non_expiring_keys=False,
         )
         secret = await _sign_in(adapter, vendor)
         # Due for renewal: inside the fifteen minutes a pass-through keeps.
@@ -698,6 +699,7 @@ class TestThroughTheBroker:
             workspace_services=WorkspaceServiceStore(),
             workspace_gate=False,
             public_url=None,
+            allow_non_expiring_keys=False,
         )
         secret = await _sign_in(adapter, vendor)
         async with session_factory() as session:
