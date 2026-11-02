@@ -231,6 +231,10 @@ def _through_replaced_client(name: str) -> str:
     return f"{name} was connected through an app this server no longer uses."
 
 
+def _through_withdrawn_method(name: str) -> str:
+    return f"{name} was connected in a way this server no longer offers."
+
+
 @dataclass(frozen=True)
 class Principal:
     """Who asks: a controller acting as the agent, or the agent's own key."""
@@ -1063,6 +1067,8 @@ class ServiceBroker:
                 )
             if self.client_replaced(connection):
                 raise await self._replaced_client(session, owner_id, service)
+            if self.method_withdrawn(connection):
+                raise _MustReconnect(_through_withdrawn_method(name))
             secret = self._secret(connection)
             token = secret.access_token
             fresh = secret.expires_at > time.time() + before.total_seconds()
@@ -1284,15 +1290,24 @@ class ServiceBroker:
         )
         return current is not None and current != connection.oauth_client_id
 
+    def method_withdrawn(self, connection: ServiceConnection) -> bool:
+        """Whether `connection` was made in a way its catalog entry no longer
+        offers (keys pasted for a service people now sign in to), so it must
+        be made again. Its row stays as it is: nothing it holds is used."""
+        entry = self._catalog.get(connection.service)
+        return entry is not None and connection.method not in entry.definition.methods()
+
     def connection_status(self, connection: ServiceConnection | None) -> str:
         """A connection's status as people and agents act on it:
         "not_connected", "active", "needs_reauthorization" or "error". One
-        made through a client its service no longer uses needs reconnecting
-        before anyone uses it and finds out, though its row stays active
-        until a token is asked for."""
+        made through a client its service no longer uses, or in a way its
+        service no longer offers, needs reconnecting before anyone uses it
+        and finds out, though its row stays active."""
         if connection is None:
             return "not_connected"
-        if connection.status == "active" and self.client_replaced(connection):
+        if connection.status == "active" and (
+            self.client_replaced(connection) or self.method_withdrawn(connection)
+        ):
             return "needs_reauthorization"
         return connection.status
 
@@ -1401,7 +1416,7 @@ class ServiceBroker:
                 f"Connect {name} under Connectors first.",
                 retryable=False,
             )
-        if connection.status != "active":
+        if connection.status != "active" or self.method_withdrawn(connection):
             raise ServiceError(
                 409,
                 CONNECTOR_REVOKED,
